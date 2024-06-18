@@ -4,8 +4,8 @@ import pygame as pg
 import time
 from random import randint
 
-# WIDTH, HEIGHT = 1600, 900
-WIDTH, HEIGHT = 1280, 720
+WIDTH, HEIGHT = 1600, 900
+# WIDTH, HEIGHT = 1280, 720
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 DELTA = {  # 移動量辞書
     pg.K_UP:(0, -5), 
@@ -27,7 +27,11 @@ def check_bound(obj_rct:pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
-def roll_dori():
+def roll_dori() -> dict:
+    """
+    引数:なし
+    戻り値:辞書を返す
+    """
     ROTE = {  # 回転量辞書
     (-5, 0):pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 2.0),
     (-5, -5):pg.transform.rotozoom(pg.image.load("fig/3.png"), -45, 2.0),
@@ -40,27 +44,46 @@ def roll_dori():
     }
     return ROTE
 
+def end_game(screen):
+    """
+    引数:screen
+    戻り値:なし
+    """
+    # blackアウト
+    end_window = pg.Surface((WIDTH,HEIGHT))
+    pg.draw.rect(end_window,(0, 0, 0),(0, 0, WIDTH, HEIGHT))
+    end_window.set_alpha(80)
+    end_rct = end_window.get_rect()
+    end_rct.center = WIDTH/2, HEIGHT/2
+    screen.blit(end_window, end_rct)
+    # ゲームオーバーを表示
+    font = pg.font.Font(None, 80)  # フォント設定   
+    txt = font.render("Game Over", True, (255, 255, 255))
+    screen.blit(txt, [WIDTH/2-120, HEIGHT/2-40])
+    #泣いてるこうかとんの表示
+    kk_cly = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 2.0)
+    screen.blit(kk_cly,[WIDTH/4+30, HEIGHT/2-60])
+    screen.blit(kk_cly,[3*WIDTH/4-30, HEIGHT/2-60])
+
+    pg.display.update()
+    time.sleep(5)
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
-    bg_img = pg.image.load("fig/pg_bg.jpg")
-    font = pg.font.Font(None, 80)    
+    bg_img = pg.image.load("fig/pg_bg.jpg") 
     #こうかとん描画設定
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 2.0) #rotozoomは拡大している
     kk_rct = kk_img.get_rect()
     kk_rct.center = 900, 400
     #爆弾の描画設定
-    # accs = [a for a in range(1, 11)]
-    # for r in range(1, 11):
-    #     bom = pg.Surface((20*r, 20*r))
-    #     pg.draw.circle(bom, (255, 0, 0), (10*r, 10*r), 10*r)
     bom = pg.Surface((20, 20))
     pg.draw.circle(bom, (255, 0, 0), (10, 10), 10)
     bom.set_colorkey((0, 0, 0))
     bom_rct = bom.get_rect()
     bom_rct.center = randint(0, WIDTH), randint(0, HEIGHT)
     vx, vy = 5, 5
-    
 
     clock = pg.time.Clock()
     tmr = 0
@@ -68,17 +91,14 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
-        
         # 衝突判定    
         if kk_rct.colliderect(bom_rct):
             print("\\\こうかとんは焼き鳥になりました🍗//")
-            # txt = font.render("YAKITORI", True, (255, 255, 255))
-            # screen.blit(txt, [WIDTH/2, HEIGHT/2])
-            # time.sleep(5)
+            end_game(screen)
             return
 
-        screen.blit(bg_img, [0, 0]) 
-
+        screen.blit(bg_img, [0, 0])
+         
         # こうかとんのキー操作と壁判定
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
@@ -107,6 +127,8 @@ def main():
         pg.display.update()
         tmr += 1
         clock.tick(50)
+    
+    
 
 
 if __name__ == "__main__":

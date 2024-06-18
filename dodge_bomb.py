@@ -1,17 +1,18 @@
 import os
 import sys
 import pygame as pg
+import time
 from random import randint
 
 # WIDTH, HEIGHT = 1600, 900
 WIDTH, HEIGHT = 1280, 720
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 DELTA = {  # 移動量辞書
     pg.K_UP:(0, -5), 
     pg.K_DOWN:(0, 5), 
     pg.K_LEFT:(-5, 0), 
     pg.K_RIGHT:(5, 0),
-    }
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+}
 
 def check_bound(obj_rct:pg.Rect) -> tuple[bool, bool]:
     """
@@ -26,22 +27,41 @@ def check_bound(obj_rct:pg.Rect) -> tuple[bool, bool]:
         tate = False
     return yoko, tate
 
+def roll_dori():
+    ROTE = {  # 回転量辞書
+    (-5, 0):pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 2.0),
+    (-5, -5):pg.transform.rotozoom(pg.image.load("fig/3.png"), -45, 2.0),
+    (0, -5):pg.transform.rotozoom(pg.transform.flip(pg.image.load("fig/3.png"), True, False), 90, 2.0),
+    (5, -5):pg.transform.rotozoom(pg.transform.flip(pg.image.load("fig/3.png"), True, False), 45, 2.0),
+    (5, 0):pg.transform.rotozoom(pg.transform.flip(pg.image.load("fig/3.png"), True, False), 0, 2.0),
+    (5, 5):pg.transform.rotozoom(pg.transform.flip(pg.image.load("fig/3.png"), True, False), -45, 2.0),
+    (0, 5):pg.transform.rotozoom(pg.transform.flip(pg.image.load("fig/3.png"), True, False), -90, 2.0),
+    (-5, 5):pg.transform.rotozoom(pg.image.load("fig/3.png"), 45, 2.0),
+    }
+    return ROTE
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
-    bg_img = pg.image.load("fig/pg_bg.jpg")    
+    bg_img = pg.image.load("fig/pg_bg.jpg")
+    font = pg.font.Font(None, 80)    
     #こうかとん描画設定
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 2.0) #rotozoomは拡大している
     kk_rct = kk_img.get_rect()
     kk_rct.center = 900, 400
     #爆弾の描画設定
+    # accs = [a for a in range(1, 11)]
+    # for r in range(1, 11):
+    #     bom = pg.Surface((20*r, 20*r))
+    #     pg.draw.circle(bom, (255, 0, 0), (10*r, 10*r), 10*r)
     bom = pg.Surface((20, 20))
     pg.draw.circle(bom, (255, 0, 0), (10, 10), 10)
     bom.set_colorkey((0, 0, 0))
     bom_rct = bom.get_rect()
     bom_rct.center = randint(0, WIDTH), randint(0, HEIGHT)
     vx, vy = 5, 5
- 
+    
+
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -52,6 +72,9 @@ def main():
         # 衝突判定    
         if kk_rct.colliderect(bom_rct):
             print("\\\こうかとんは焼き鳥になりました🍗//")
+            # txt = font.render("YAKITORI", True, (255, 255, 255))
+            # screen.blit(txt, [WIDTH/2, HEIGHT/2])
+            # time.sleep(5)
             return
 
         screen.blit(bg_img, [0, 0]) 
@@ -59,13 +82,17 @@ def main():
         # こうかとんのキー操作と壁判定
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
-        for k, v in DELTA.items():
+        for k, v in DELTA.items(): # 移動量
             if key_lst[k]:
                 sum_mv[0] += v[0]
                 sum_mv[1] += v[1]
         kk_rct.move_ip(sum_mv)
+        # print(sum_mv)
+
         if check_bound(kk_rct) != (True, True):
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
+        if sum_mv != [0, 0]:
+            kk_img = roll_dori()[tuple(sum_mv)]
         screen.blit(kk_img, kk_rct)
 
         # 爆弾の描画と壁判定
@@ -73,9 +100,9 @@ def main():
         screen.blit(bom, bom_rct)
         yoko, tate = check_bound(bom_rct)
         if not yoko:  # 横方向にはみ出たら
-            vx *= -1.1
+            vx *= -1
         if not tate:  # 縦方向にはみ出たら
-            vy *= -1.1
+            vy *= -1
 
         pg.display.update()
         tmr += 1

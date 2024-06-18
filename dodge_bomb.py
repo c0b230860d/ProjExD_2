@@ -1,7 +1,7 @@
 import os
 import sys
 import pygame as pg
-
+from random import randint
 
 WIDTH, HEIGHT = 1600, 900
 DELTA = {  # 移動量辞書
@@ -17,9 +17,18 @@ def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
     bg_img = pg.image.load("fig/pg_bg.jpg")    
+    #こうかとん描画設定
     kk_img = pg.transform.rotozoom(pg.image.load("fig/3.png"), 0, 2.0) #rotozoomは拡大している
     kk_rct = kk_img.get_rect()
     kk_rct.center = 900, 400
+    #爆弾の描画設定
+    bom = pg.Surface((20, 20))
+    pg.draw.circle(bom, (255, 0, 0), (10, 10), 10)
+    bom.set_colorkey((0, 0, 0))
+    bom_rct = bom.get_rect()
+    bom_rct.center = randint(0, WIDTH), randint(0, HEIGHT)
+    vx, vy = 5, 5
+ 
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -34,9 +43,12 @@ def main():
             if key_lst[k]:
                 sum_mv[0] += v[0]
                 sum_mv[1] += v[1]
-        print(sum_mv)
         kk_rct.move_ip(sum_mv)
         screen.blit(kk_img, kk_rct)
+    
+        bom_rct.move_ip(vx, vy)
+        screen.blit(bom, bom_rct)
+
         pg.display.update()
         tmr += 1
         clock.tick(50)

@@ -14,6 +14,7 @@ DELTA = {  # 移動量辞書
     pg.K_RIGHT:(5, 0),
 }
 
+
 def check_bound(obj_rct:pg.Rect) -> tuple[bool, bool]:
     """
     引数:こうかとんRectまたは爆弾Rect
@@ -26,6 +27,7 @@ def check_bound(obj_rct:pg.Rect) -> tuple[bool, bool]:
     if obj_rct.top < 0 or HEIGHT < obj_rct.bottom:  # 縦判定
         tate = False
     return yoko, tate
+
 
 def roll_dori() -> dict:
     """
@@ -43,6 +45,7 @@ def roll_dori() -> dict:
     (-5, 5):pg.transform.rotozoom(pg.image.load("fig/3.png"), 45, 2.0),
     }
     return ROTE
+
 
 def end_game(screen)->None:
     """
@@ -68,6 +71,7 @@ def end_game(screen)->None:
     pg.display.update()
     time.sleep(5)
 
+
 def add_speed_size()->tuple:
     """
     引数:なし
@@ -82,7 +86,8 @@ def add_speed_size()->tuple:
         bb_imgs.append(bom)
 
     return accs, bb_imgs
-        
+
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -119,8 +124,7 @@ def main():
         bb_accs, bom_imgs = add_speed_size()
         avx = vx * bb_accs[min(tmr//500, 9)]
         bom = bom_imgs[min(tmr//500, 9)]
-
-         
+   
         # こうかとんのキー操作と壁判定
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
@@ -150,8 +154,6 @@ def main():
         tmr += 1
         clock.tick(50)
     
-    
-
 
 if __name__ == "__main__":
     pg.init()

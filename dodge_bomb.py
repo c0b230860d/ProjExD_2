@@ -3,7 +3,8 @@ import sys
 import pygame as pg
 from random import randint
 
-WIDTH, HEIGHT = 1600, 900
+# WIDTH, HEIGHT = 1600, 900
+WIDTH, HEIGHT = 1280, 720
 DELTA = {  # 移動量辞書
     pg.K_UP:(0, -5), 
     pg.K_DOWN:(0, 5), 
@@ -12,6 +13,18 @@ DELTA = {  # 移動量辞書
     }
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
+def check_bound(obj_rct:pg.Rect) -> tuple[bool, bool]:
+    """
+    引数:こうかとんRectまたは爆弾Rect
+    戻り値:タプル(横方向判定結果, 縦方向判定結果)
+    画面内ならTrue, 画面外ならFalseを返す
+    """
+    yoko, tate = True, True
+    if obj_rct.left < 0 or WIDTH < obj_rct.right:  # 横判定
+        yoko = False
+    if obj_rct.top < 0 or HEIGHT < obj_rct.bottom:  # 縦判定
+        tate = False
+    return yoko, tate
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -37,6 +50,7 @@ def main():
                 return
         screen.blit(bg_img, [0, 0]) 
 
+        #こうかとんのキー操作
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
         for k, v in DELTA.items():
@@ -44,10 +58,18 @@ def main():
                 sum_mv[0] += v[0]
                 sum_mv[1] += v[1]
         kk_rct.move_ip(sum_mv)
+        if check_bound(kk_rct) != (True, True):
+            kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
-    
+
+        #爆弾の描画
         bom_rct.move_ip(vx, vy)
         screen.blit(bom, bom_rct)
+        yoko, tate = check_bound(bom_rct)
+        if not yoko:  # 横方向にはみ出たら
+            vx *= -1
+        if not tate:  # 縦方向にはみ出たら
+            vy *= -1
 
         pg.display.update()
         tmr += 1

@@ -48,9 +48,15 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
+        
+        # 衝突判定    
+        if kk_rct.colliderect(bom_rct):
+            print("\\\こうかとんは焼き鳥になりました🍗//")
+            return
+
         screen.blit(bg_img, [0, 0]) 
 
-        #こうかとんのキー操作
+        # こうかとんのキー操作と壁判定
         key_lst = pg.key.get_pressed()
         sum_mv = [0, 0]
         for k, v in DELTA.items():
@@ -62,14 +68,14 @@ def main():
             kk_rct.move_ip(-sum_mv[0], -sum_mv[1])
         screen.blit(kk_img, kk_rct)
 
-        #爆弾の描画
+        # 爆弾の描画と壁判定
         bom_rct.move_ip(vx, vy)
         screen.blit(bom, bom_rct)
         yoko, tate = check_bound(bom_rct)
         if not yoko:  # 横方向にはみ出たら
-            vx *= -1
+            vx *= -1.1
         if not tate:  # 縦方向にはみ出たら
-            vy *= -1
+            vy *= -1.1
 
         pg.display.update()
         tmr += 1

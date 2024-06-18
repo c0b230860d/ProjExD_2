@@ -44,10 +44,11 @@ def roll_dori() -> dict:
     }
     return ROTE
 
-def end_game(screen):
+def end_game(screen)->None:
     """
     引数:screen
     戻り値:なし
+    ゲームオーバー画面を表示
     """
     # blackアウト
     end_window = pg.Surface((WIDTH,HEIGHT))
@@ -64,11 +65,24 @@ def end_game(screen):
     kk_cly = pg.transform.rotozoom(pg.image.load("fig/8.png"), 0, 2.0)
     screen.blit(kk_cly,[WIDTH/4+30, HEIGHT/2-60])
     screen.blit(kk_cly,[3*WIDTH/4-30, HEIGHT/2-60])
-
     pg.display.update()
     time.sleep(5)
 
+def add_speed_size()->tuple:
+    """
+    引数:なし
+    戻り値：タプル(加速度リスト, 拡大リスト)
+    """
+    accs = [a for a in range(1, 11)]  # 加速度リスト
+    bb_imgs = []
+    for r in range(1, 11):
+        bom = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bom, (255, 0, 0), (10*r, 10*r), 10*r)
+        bom.set_colorkey((0, 0, 0))
+        bb_imgs.append(bom)
 
+    return accs, bb_imgs
+        
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -94,10 +108,18 @@ def main():
         # 衝突判定    
         if kk_rct.colliderect(bom_rct):
             print("\\\こうかとんは焼き鳥になりました🍗//")
-            end_game(screen)
+            add_speed_size()
+            end_game(screen)  # ゲームオーバー画面を呼び出す
             return
 
+        # 背景を表示
         screen.blit(bg_img, [0, 0])
+
+        #拡大と加速
+        bb_accs, bom_imgs = add_speed_size()
+        avx = vx * bb_accs[min(tmr//500, 9)]
+        bom = bom_imgs[min(tmr//500, 9)]
+
          
         # こうかとんのキー操作と壁判定
         key_lst = pg.key.get_pressed()
@@ -116,7 +138,7 @@ def main():
         screen.blit(kk_img, kk_rct)
 
         # 爆弾の描画と壁判定
-        bom_rct.move_ip(vx, vy)
+        bom_rct.move_ip(avx, vy)
         screen.blit(bom, bom_rct)
         yoko, tate = check_bound(bom_rct)
         if not yoko:  # 横方向にはみ出たら
